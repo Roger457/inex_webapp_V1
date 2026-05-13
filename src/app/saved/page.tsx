@@ -142,7 +142,7 @@ export default function SavedPage() {
                 >
                   <Bookmark className="w-5 h-5 fill-blue-500" />
                 </button>
-                
+                <a
                   href={company.application_url}
                   target="_blank"
                   rel="noopener noreferrer"

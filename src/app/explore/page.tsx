@@ -106,20 +106,34 @@ export default function ExplorePage() {
     setLoading(false);
   }
 
-  async function toggleSave(e: React.MouseEvent, companyId: string) {
-    e.stopPropagation();
-    if (!profile) return;
-    const isSaved = savedIds.includes(companyId);
-    if (isSaved) {
-      await supabase.from("saved_companies").delete()
-        .eq("student_id", profile.id).eq("company_id", companyId);
-      setSavedIds((prev) => prev.filter((id) => id !== companyId));
-    } else {
-      await supabase.from("saved_companies")
-        .insert({ student_id: profile.id, company_id: companyId });
+ async function toggleSave(e: React.MouseEvent, companyId: string) {
+  e.stopPropagation();
+  e.preventDefault();
+  if (!profile) return;
+
+  const isSaved = savedIds.includes(companyId);
+
+  if (isSaved) {
+    await supabase
+      .from("saved_companies")
+      .delete()
+      .eq("student_id", profile.id)
+      .eq("company_id", companyId);
+    setSavedIds((prev) => prev.filter((id) => id !== companyId));
+  } else {
+    const { error } = await supabase
+      .from("saved_companies")
+      .insert({ student_id: profile.id, company_id: companyId });
+    if (!error) {
       setSavedIds((prev) => [...prev, companyId]);
+      await supabase.from("interactions").insert({
+        student_id: profile.id,
+        company_id: companyId,
+        action: "saved",
+      });
     }
   }
+}
 
   function handleCardClick(company: Company) {
     if (profile) {
