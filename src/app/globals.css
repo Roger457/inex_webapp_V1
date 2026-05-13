@@ -1,26 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* ── Design tokens ─────────────────────────────────────────────────────────── */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Backgrounds */
+    --bg-base:       #080c10;
+    --bg-surface:    #0d1420;
+    --bg-surface-2:  #131d2e;
+    --bg-surface-3:  #1a2640;
+
+    /* Brand */
+    --teal:          #10b981;
+    --teal-light:    #34d399;
+    --teal-dim:      rgba(16, 185, 129, 0.08);
+    --teal-border:   rgba(16, 185, 129, 0.2);
+    --teal-glow:     rgba(16, 185, 129, 0.35);
+
+    /* Text */
+    --text-primary:  #e2e8f0;
+    --text-mid:      #94a3b8;
+    --text-dim:      #475569;
+
+    /* Borders */
+    --border:        rgba(16, 185, 129, 0.12);
+    --border-mid:    rgba(255, 255, 255, 0.1);
+
+    /* Semantic */
+    --blue:          #3b82f6;
+    --purple:        #8b5cf6;
+    --amber:         #f59e0b;
+    --red:           #ef4444;
+
+    /* Radius */
+    --radius-sm:     6px;
+    --radius-md:     10px;
+    --radius-lg:     14px;
+    --radius-xl:     20px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Base resets ────────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: var(--border);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'Syne', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden; /* map app — no page scroll */
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar       { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--teal-border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--teal); }
+
+  /* Focus rings */
+  :focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Remove focus ring for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/* ── Typography ─────────────────────────────────────────────────────────────── */
+@layer base {
+  h1, h2, h3, h4 {
+    font-family: 'Syne', sans-serif;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  code, kbd, pre, .mono {
+    font-family: 'DM Mono', monospace;
+  }
+}
+
+/* ── Component utilities ────────────────────────────────────────────────────── */
+@layer components {
+
+  /* Glass card — used for floating panels on the map */
+  .card-glass {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Teal glow ring — used for active/selected states */
+  .ring-teal {
+    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
+  }
+
+  /* Dot grid background — used on welcome screen and map canvas */
+  .bg-dot-grid {
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Mono label — small uppercase tracking label */
+  .label-mono {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* Sidebar section divider */
+  .sidebar-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 -1px;
+  }
+}
+
+/* ── Animations ─────────────────────────────────────────────────────────────── */
+@layer utilities {
+
+  /* Radar pulse — used on welcome screen */
+  .animate-radar {
+    animation: radar-expand 4s ease-out infinite;
+  }
+
+  @keyframes radar-expand {
+    0%   { transform: translate(-50%, -50%) scale(0.1); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(1);   opacity: 0; }
+  }
+
+  /* User location pulse */
+  .animate-location-ping {
+    animation: location-ping 2s ease-out infinite;
+  }
+
+  @keyframes location-ping {
+    0%   { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+  }
+
+  /* Radar sweep on the map */
+  .animate-sweep {
+    animation: radar-sweep 4s linear infinite;
+  }
+
+  @keyframes radar-sweep {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* Breathing dot — live indicator */
+  .animate-breathe {
+    animation: breathe 2s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(1.4); }
+  }
+
+  /* Slide up + fade — panel entrance */
+  .animate-panel-in {
+    animation: panel-in 0.25s ease both;
+  }
+
+  @keyframes panel-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Fade up — welcome screen stagger */
+  .animate-fade-up {
+    animation: fade-up 0.6s ease both;
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
