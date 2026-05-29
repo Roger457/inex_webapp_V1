@@ -1,20 +1,9 @@
 import type { Metadata } from "next";
-import { Syne, DM_Mono } from "next/font/google";
+
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 import BottomNav from "@/components/BottomNav";
 
-const syne = Syne({
-  subsets: ["latin"],
-  variable: "--font-syne",
-  display: "swap",
-});
-
-const dmMono = DM_Mono({
-  subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  variable: "--font-dm-mono",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "InternMap — Find Internships Near You",
@@ -37,8 +26,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${syne.variable} ${dmMono.variable}`}
-      suppressHydrationWarning
+      className="font-sans"
     >
       <body className="font-display antialiased">
         {children}

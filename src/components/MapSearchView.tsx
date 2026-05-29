@@ -21,6 +21,10 @@ type Company = {
   longitude: number;
   distance_km: number | null;
 };
+type MapCompany = Company & {
+  latitude: number;
+  longitude: number;
+};
 
 type Profile = {
   id: string;
@@ -51,7 +55,7 @@ export default function MapSearchView({
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [manualCity, setManualCity] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<MapCompany | null>(null);
   const [locationError, setLocationError] = useState("");
   const [mapCenter, setMapCenter] = useState<[number, number]>([4.0511, 9.7085]);
 
@@ -244,18 +248,15 @@ export default function MapSearchView({
                 Looking for internships nearby...
               </div>
             )}
-
-            {!loading && companies.length === 0 && (
-              <div className="py-8 text-center text-gray-400 text-sm">
-                <MapPin className="w-8 h-8 mx-auto mb-2" />
-                <p>No companies found in this area.</p>
-                {subscriptionTier === "free" && (
-                  <p className="text-xs mt-1 text-amber-600">
-                    Upgrade to Pro to search up to 25km away.
-                  </p>
-                )}
-              </div>
-            )}
+{subscriptionTier === "free" && (
+  <button
+    onClick={() => window.location.href = "/pricing"}
+    className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full hover:bg-amber-100 transition-colors"
+  >
+    <Lock className="w-3 h-3" />
+    5km limit · Upgrade →
+  </button>
+)}
 
             {!loading && companies.map((company) => (
               <div

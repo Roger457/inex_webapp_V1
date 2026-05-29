@@ -70,7 +70,7 @@ export const useMapStore = create<MapStore>((set, get) => ({
   setSelected: (internship) => set({ selected: internship }),
 
   // ── Plan ──────────────────────────────────────────────────────────────────
-  plan:           "free",
+  plan:           "FREE",
   showPricing:    false,
   setPlan:        (tier) => set({ plan: tier }),
   setShowPricing: (show) => set({ showPricing: show }),

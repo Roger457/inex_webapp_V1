@@ -1,0 +1,46 @@
+
+services:
+
+  inex-app:
+    build: .
+    container_name: inex-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    restart: always
+
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonar-db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonarpassword
+    depends_on:
+      - sonar-db
+
+  sonar-db:
+    image: postgres:15
+    container_name: sonar-db
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonarpassword
+      POSTGRES_DB: sonar
+    volumes:
+      - sonar_data:/var/lib/postgresql/data
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+
+volumes:
+  sonar_data:
+  jenkins_home:
