@@ -45,6 +45,10 @@ export default function CompanyDetailPage() {
         .select("*")
         .eq("slug", slug)
         .single();
+        
+        
+
+        
 
       if (!companyData) { router.push("/explore"); return; }
       setCompany(companyData);
