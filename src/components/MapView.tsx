@@ -33,7 +33,6 @@ const userIcon = new L.DivIcon({
   "></div>`,
   iconAnchor: [8, 8],
 });
-
 type MapCompany = {
   id: string;
   name: string;
@@ -41,8 +40,12 @@ type MapCompany = {
   description: string;
   city: string;
   sector: string;
+  logo_url: string | null;
+  internship_types: string[];
+  application_url: string;
   longitude: number;
   latitude: number;
+  distance_km: number | null;
 };
 
 type Props = {
