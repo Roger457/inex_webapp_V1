@@ -3,15 +3,9 @@ pipeline {
 
     stages {
 
-        stage('Install') {
+        stage('Checkout') {
             steps {
-                sh 'npm install'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh 'npm run build'
+                checkout scm
             }
         }
 
@@ -21,5 +15,10 @@ pipeline {
             }
         }
 
+        stage('Docker Up') {
+            steps {
+                sh 'docker compose up -d'
+            }
+        }
     }
 }
