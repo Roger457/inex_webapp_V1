@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Search, MapPin, Bookmark, LogOut, ChevronRight } from "lucide-react";
+import { Search, MapPin, Bookmark, LogOut, ChevronRight, Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const MapSearchView = dynamic(() => import("@/components/MapSearchView"), { ssr: false });
@@ -50,6 +50,11 @@ export default function ExplorePage() {
   const [mode, setMode] = useState<"home" | "map">("home");
   const [radiusKm, setRadiusKm] = useState(5);
   const [subscriptionTier, setSubscriptionTier] = useState("free");
+  const [manualCity, setManualCity] = useState("");
+  const [locationError, setLocationError] = useState("");
+  const [mapCenter, setMapCenter] = useState<[number, number]>([4.0511, 9.7085]);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -158,6 +163,46 @@ export default function ExplorePage() {
   const firstName = profile?.full_name?.split(" ")[0] || "there";
 
   if (mode === "map") {
+    
+    const CITY_COORDS: Record<string, [number, number]> = {
+  "douala": [4.0511, 9.7085],
+  "yaoundé": [3.8480, 11.5021],
+  "yaounde": [3.8480, 11.5021],
+  "buea": [4.1527, 9.2412],
+  "limbe": [4.0167, 9.2000],
+  "bafoussam": [5.4764, 10.4176],
+};
+
+function handleUseGPS() {
+  setLocationError("");
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      setUserLocation(coords);
+      setMapCenter([coords.lat, coords.lng]);
+      setShowLocationPrompt(false);
+      setMode("map");
+    },
+    () => {
+      setLocationError("Could not get your location. Try entering a city manually.");
+    },
+    { timeout: 10000 }
+  );
+}
+
+function handleManualCity() {
+  const key = manualCity.trim().toLowerCase();
+  const coords = CITY_COORDS[key];
+  if (!coords) {
+    setLocationError("City not found. Try: Douala, Yaoundé, Buea, Limbe, Bafoussam");
+    return;
+  }
+  setLocationError("");
+  setUserLocation({ lat: coords[0], lng: coords[1] });
+  setMapCenter(coords);
+  setShowLocationPrompt(false);
+  setMode("map");
+}
     return (
       <MapSearchView
         profile={profile}
@@ -204,7 +249,7 @@ export default function ExplorePage() {
 
         {/* Quick action — Nearby */}
         <button
-          onClick={() => setMode("map")}
+          onClick={() => setShowLocationPrompt(true)}
           className="mt-3 flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-sm font-medium hover:bg-blue-100 transition-colors"
         >
           <MapPin className="w-4 h-4" />
