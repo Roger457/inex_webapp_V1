@@ -1,11 +1,25 @@
 pipeline {
     agent any
 
+    tools {
+        sonarQubeScanner 'SonarScanner'
+    }
+
     stages {
 
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                    sonar-scanner
+                    '''
+                }
             }
         }
 
@@ -15,7 +29,7 @@ pipeline {
             }
         }
 
-        stage('Docker Up') {
+        stage('Deploy') {
             steps {
                 sh 'docker compose up -d'
             }
