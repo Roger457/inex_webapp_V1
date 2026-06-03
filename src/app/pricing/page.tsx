@@ -248,5 +248,6 @@ const error = searchParams.get("error");
         </p>
       </div>
     </div>
+    
   );
 }

@@ -102,6 +102,7 @@ export default function CompanyDetailPage() {
       </div>
     );
   }
+  
 
   if (!company) return null;
 

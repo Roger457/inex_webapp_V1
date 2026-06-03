@@ -21,6 +21,7 @@ type Company = {
   internship_types: string[];
   fields_offered: string[];
   what_you_gain: string[];
+  is_premium: boolean;
   latitude: number;
   longitude: number;
   distance_km: number | null;
