@@ -37,6 +37,7 @@ type Props = {
   onBack: () => void;
   onViewCompany: (slug: string) => void;
   onToggleSave: (e: React.MouseEvent, companyId: string) => void;
+
 };
 
 const CITY_COORDS: Record<string, [number, number]> = {
@@ -56,7 +57,7 @@ export default function MapSearchView({
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
-  const [locationMode, setLocationMode] = useState<"prompt" | "locating" | "located">("prompt");
+  const [locationMode, setLocationMode] = useState<"prompt" | "locating" | "city_selected" | "located">("prompt");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [manualCity, setManualCity] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(true);
@@ -91,12 +92,18 @@ export default function MapSearchView({
       return;
     }
     setLocationError("");
-    setUserLocation({ lat: coords[0], lng: coords[1] });
+    setUserLocation(null);
     setMapCenter(coords);
-    setLocationMode("located");
-    fetchNearbyCompanies(coords[0], coords[1]);
+    setLocationMode("city_selected");
+    
     
   }
+  function handleMapClick(lat: number, lng: number) {
+  const coords = { lat, lng };
+  setUserLocation(coords);
+  setLocationMode("located");
+  fetchNearbyCompanies(lat, lng);
+}
 
   async function fetchNearbyCompanies(lat: number, lng: number) {
     setLoading(true);
@@ -180,8 +187,18 @@ export default function MapSearchView({
           <p className="text-sm font-medium text-blue-700">Getting your location...</p>
         </div>
       )}
+      {/* Tap instruction banner */}
+{locationMode === "city_selected" && (
+  <div className="shrink-0 bg-blue-600 px-4 py-3 flex items-center gap-3">
+    <MapPin className="w-4 h-4 text-white shrink-0" />
+    <p className="text-sm text-white font-medium">
+      Tap anywhere on the map to set your search point
+    </p>
+  </div>
+)}
 
       {/* Map — takes remaining space */}
+      {(locationMode === "city_selected" || locationMode === "located") && (
       <div className="flex-1 relative" style={{ minHeight: 0 }}>
         <MapView
           companies={companies}
@@ -191,8 +208,10 @@ export default function MapSearchView({
           center={mapCenter}
           userLocation={userLocation}
           radiusKm={radiusKm}
+          onMapClick={locationMode === "city_selected" ? handleMapClick : undefined}
         />
       </div>
+      )}
 
       {/* Bottom drawer — always visible when located */}
       {locationMode === "located" && (

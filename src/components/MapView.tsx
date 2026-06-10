@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -56,6 +56,7 @@ type Props = {
   center?: [number, number];
   userLocation?: { lat: number; lng: number } | null;
   radiusKm?: number;
+  onMapClick?: (lat: number, lng: number) => void;
 };
 
 function MapUpdater({ center, companies }: { center?: [number, number]; companies: MapCompany[] }) {
@@ -71,9 +72,21 @@ function MapUpdater({ center, companies }: { center?: [number, number]; companie
   return null;
 }
 
+/* new component */
+function MapClickHandler({ onMapClick }: { onMapClick?: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) {
+      if (onMapClick) {
+        onMapClick(e.latlng.lat, e.latlng.lng);
+      }
+    },
+  });
+  return null;
+}
+
 export default function MapView({
   companies, selectedCompany, onSelectCompany,
-  onViewDetails, center, userLocation, radiusKm = 5,
+  onViewDetails, center, userLocation, radiusKm = 5, onMapClick,
 }: Props) {
   return (
     <MapContainer
@@ -88,6 +101,7 @@ export default function MapView({
 />
 
       <MapUpdater center={center} companies={companies} />
+      <MapClickHandler onMapClick={onMapClick} />
 
       {/* User location dot */}
       {userLocation && (
@@ -142,6 +156,7 @@ export default function MapView({
           </Popup>
         </Marker>
       ))}
+ 
     </MapContainer>
   );
 }
